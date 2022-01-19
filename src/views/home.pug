@@ -10,13 +10,20 @@ html(lang="en")
         header 
             h1 Noom!
         main
-            form#nick
-                input(type="text", placeholder="닉네임을 입력해 주세요..", required)
-                button 저장
-            ul
-            form#message
-                input(type="text", placeholder="메세지를 입력해 주세요..", required)
-                button 입력
-        button call
+            div#welcome
+                form#nickname
+                    input(placeholder="nickname",required, type="text")
+                    button 저장
+                form#login
+                    input(placeholder="room name",required, type="text")
+                    button 채팅방 들어가기
+            div#room
+                h3
+                h2
+                ul
+                form#msg
+                    input(placeholder="message",required, type="text")
+                    button 입력
+        script(src="/socket.io/socket.io.js")
         script(src="/public/js/app.js")
         

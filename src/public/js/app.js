@@ -1,50 +1,73 @@
-// Front-End
+const socket = io();
 
-const messageList = document.querySelector("ul");
-const messageForm = document.querySelector("#message");
-const nickForm = document.querySelector("#nick");
-const socket = new WebSocket(`ws://${window.location.host}`);
-// app.js 의 socket은 서버로의 연결을 뜻함
+const welcome = document.getElementById("welcome");
+const form = welcome.querySelector("#login");
+const room = document.getElementById("room");
 
+room.hidden = true;
+let roomName;
 
-    // json 사용이유는 닉네임과 메세지 구분하기위해서
-    // string type 만 전송되기때문에 변환함
-const makeMessage = (type,val) => {
-    const msg = { type, val};
-    return JSON.stringify(msg);
-}
-
-socket.addEventListener("open",()=> {
-    console.log("서버와 연결되었습니다 !!")
-});
-
-    // message 안에 data에 서버의socket.send("hello!!!"); 내용이 담김
-socket.addEventListener("message", (message)=> {
-    // console.log("New message : ", message.data);
+const addMessage = (msg) => {
+    const ul = room.querySelector("ul");
     const li = document.createElement("li");
-    li.innerText = message.data;
-    messageList.append(li);
-});
-
-socket.addEventListener("close",()=> {
-    console.log("서버 연결이 끊겼습니다")
-});
-
-const handleSubmit = (e) => {
+    li.innerText = msg;
+    ul.appendChild(li);
+} 
+const handleMessageSubmit = (e) => {
     e.preventDefault();
-    const input = messageForm.querySelector("input");
-    socket.send(makeMessage("new_message", input.value));
+    const input = room.querySelector("#msg input");
+    const value = input.value;
+    socket.emit('message', input.value,roomName, () =>{
+        addMessage(`당신 : ${value}`);
+    });
+    input.value="";
+}
+
+const handleNicknameSubmit = (e) => {
+    e.preventDefault();
+    const input = welcome.querySelector("#nickname input");
+    socket.emit("nickname", input.value);
+}
+
+const showRoom = () => {
+    welcome.hidden = true;
+    room.hidden = false;
+    const h3 = room.querySelector("h3");
+    const h2 = room.querySelector("h2");
+
+    h3.innerText = `Room - ${roomName}`;
+    h2.innerText = `NickName : ${nickName}`;
+    const msgform = room.querySelector("#msg");
+    const nameform = welcome.querySelector("#nickname");
+    msgform.addEventListener("submit", handleMessageSubmit);
+    nameform.addEventListener("submit", handleNicknameSubmit);
+
+}
+
+// room 입장함수
+const handleRoomSubmit = (e) => {
+    e.preventDefault();
+    const input = form.querySelector("#login input");
+    // socket.emit 으로 송신하고 server에서 socket.on 으로 정보를 받는구조
+    // 그렇기때문에 emit 과 on 의 소켓명이 동일 해야한다.
+    socket.emit("enter_room", input.value,showRoom);
+    // 첫번째는 event 이름 을 넣고 그 뒤는 상관없다.
+    // 함수를 사용할 때는 꼭 마지막 argument에 넣어야한다.
+    roomName = input.value;
     input.value='';
-    // console.log(input.value);
-    // JSON.stringify(obj) --> JSON.parse(stringify한 값) --> js obj 로 변환 
 }
 
+form.addEventListener("submit", handleRoomSubmit);
 
-const handleNickSubmit = (e) => {
-    e.preventDefault();
-    const input = nickForm.querySelector("input");
-    socket.send(makeMessage("nickname",input.value));
-}
+// New User 가 들어왔을 때 
+socket.on("welcome",(user) => {
+    addMessage(`${user}가 방에 들어왔습니다.`);
+});
 
-messageForm.addEventListener("submit",handleSubmit);
-nickForm.addEventListener("submit", handleNickSubmit)
+// session out 됐을때 message
+socket.on("bye",(user) => {
+    addMessage(`${user}가 방을 나갔습니다.`);
+});
+
+// message
+socket.on("message", addMessage);
