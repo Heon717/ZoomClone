@@ -4,7 +4,8 @@
   "description": "Zoom Clone using NodeJS, WebRTC and Websockets",
   "license": "MIT",
   "scripts": {
-    "dev": "nodemon"
+    "dev": "nodemon",
+    "heroku-postbuild":"npm run build"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.16.8",
