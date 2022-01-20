@@ -4,6 +4,7 @@
   "description": "Zoom Clone using NodeJS, WebRTC and Websockets",
   "license": "MIT",
   "scripts": {
+    "start": "node server/server.js",
     "dev": "nodemon",
     "heroku-postbuild":"npm run build"
   },
