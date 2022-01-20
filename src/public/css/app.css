@@ -1,0 +1,131 @@
+* {
+    list-style-type: none;
+    text-decoration: none;
+
+}
+
+.fa-search-minus {
+    color: #00acee;
+    margin-top: 10px;
+    margin-left: 20px;
+}
+
+.fa-minus{
+    float: right;
+    margin-top: 8px;
+    margin-right: 20px;
+}
+
+.fa-times{
+    float: right;
+    margin-top: 8px;
+    margin-right: 20px;
+}
+
+#wrap {
+    width: 420px;
+    height: 600px;
+    margin: 0 auto;
+    border-radius: 25px;
+    background-color: whitesmoke;
+}
+
+header {
+    position: relative;
+    margin-top: 100px;
+    height: 80px;
+}
+
+header > h1 {
+    position: relative;
+    top: 20px;
+    text-align: center;
+}
+
+#welcome {
+    position: relative;
+    width: 420px;
+    height: 480px;
+}
+
+#login {
+    padding-top: 100px;
+    height: 80%;
+}
+
+#login > h4,ul {
+    text-align: center;
+}
+
+#login > ul {
+    height: 100px;
+}
+
+#login > button {
+    position: relative;
+    width: 200px;
+    height: 60px;
+    margin-left: 110px;
+    border-radius: 10px;
+    background-color: #00acee;
+    color: #eee;
+}
+
+input::placeholder{
+    font-style: italic;
+    text-align: center;
+}
+
+#nickName{
+    margin-bottom: 20px;
+    margin-left: 30px;
+    width: 350px;
+    height: 40px;
+}
+
+#roomName {
+    margin-bottom: 20px;
+    margin-left: 30px;
+    width: 350px;
+    height: 40px;
+}
+
+#room>h3 {
+    text-align: center;
+    font-weight: bold;
+    color: rgb(59, 55, 55);
+}
+
+#room>ul {
+    padding: 10px;
+    height: 370px;
+    background-color: white;
+    border:1px #eee solid;
+    text-align: left;
+}
+
+#msg {
+    height: 50px;
+}
+
+#msg > input {
+    border-radius: 10px;
+    width: 320px;
+    height: 35px;
+    margin-left: 15px;
+}
+
+#msg > button {
+    border-radius: 10px;
+    width: 60px;
+    height: 38px;
+    margin-left: 8px;
+    background-color: #00acee;
+    color: #eee;
+}
+
+#room>h3 {
+    text-align: center;
+    font-weight: bold;
+    color: rgb(59, 55, 55);
+}

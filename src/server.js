@@ -1,8 +1,8 @@
 // Back-End
 
 import http from "http";
-import SocketIO from "socket.io";
-// import WebSocker from "ws";
+import {Server} from "socket.io";
+import {instrument} from "@socket.io/admin-ui";
 import express from "express";
 
 const app = express();
@@ -15,12 +15,42 @@ app.get("/*", (req,res) => res.redirect("/"));
 
 const httpServer = http.createServer(app); // http 서버
 // const wss = new WebSocker.Server({ server }); // WebSocker 서버
-const io = SocketIO(httpServer); // Socket.io 서버
+const io = new Server(httpServer, {
+    cors: {
+        origin: ["https://admin.socket.io"],
+        credentials:true,
+    },
+}); // Socket.io 서버
+
+instrument(io, {
+    auth: false
+});
+
+// 생성된 방 알려주는 함수
+const publicRooms = () => {
+    const {
+        sockets: {
+            adapter: {sids,rooms},
+        },
+    } = io;
+    const publicRooms = [];
+    rooms.forEach((_,key)=> {
+        if(sids.get(key) === undefined) {
+            publicRooms.push(key)
+        }
+    })
+    return publicRooms;
+}
+// 방에 인원수 체크하는 함수
+const countRoom = (roomName) => {
+    return io.sockets.adapter.rooms.get(roomName)?.size;
+}
 
 io.on("connection",socket => {
     socket["nickname"] = "익명유저";
     // 여기서 매개변수(parameter) done 은  front emit 에서 함수 부분이다
     socket.onAny(e=>{
+        console.log(io.sockets.adapter);
         console.log(`socket event:${e}`);
     })
     socket.on("enter_room", (roomName,done) => {
@@ -33,13 +63,20 @@ io.on("connection",socket => {
         // 어떤방에 들어갔는지 알수있는 명령
         console.log(socket.rooms);
         done();
-        // New User 가 들어왔을 때 
-        socket.to(roomName).emit("welcome",socket.nickname);
+        // New User 가 들어왔을 때 (하나의 socket에만 보냄)
+        socket.to(roomName).emit("welcome",socket.nickname, countRoom(roomName));
+        // message를 보든 socket 에게 보냄
+        io.sockets.emit("room_change", publicRooms());
     });
 
     // session out 됐을때 message
     socket.on("disconnecting",()=> {
-        socket.rooms.forEach(room=> socket.to(room).emit("bye",socket.nickname));
+        socket.rooms.forEach(room=>
+             socket.to(room).emit("bye",socket.nickname,countRoom(room)-1));
+    })
+
+    socket.on("disconnect",() => {
+        io.sockets.emit("room_change", publicRooms());
     })
 
     socket.on("message",(msg,room,done) => {
