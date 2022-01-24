@@ -5,6 +5,7 @@ import {Server} from "socket.io";
 import {instrument} from "@socket.io/admin-ui";
 import express from "express";
 
+/* socket io 부분 */
 const app = express();
 
 app.set('view engine', "pug");
@@ -25,6 +26,22 @@ const io = new Server(httpServer, {
 instrument(io, {
     auth: false
 });
+
+
+/*=========  DB설정 부분  ========*/
+const mysql = require('mysql');
+const connection = mysql.createConnection({
+    host : '127.0.0.1',
+    user : 'root',
+    password : '',
+    database : 'node'
+});
+
+connection.connect(); // mysql 에 연결
+        // connection.end(); // DB 연결 해제
+/*=========  DB설정 부분  ========*/
+
+
 
 // 생성된 방 알려주는 함수
 const publicRooms = () => {
@@ -48,11 +65,20 @@ const countRoom = (roomName) => {
 
 io.on("connection",socket => {
     socket["nickname"] = "익명유저";
-    // 여기서 매개변수(parameter) done 은  front emit 에서 함수 부분이다
     socket.onAny(e=>{
         console.log(io.sockets.adapter);
         console.log(`socket event:${e}`);
     })
+
+    // 만들어져 있는 방 쿼리문
+    connection.query('SELECT DISTINCT roomname FROM roomchat', (err , rows , fields) => {
+        let roomList = [];
+        for (let data of rows) {
+            roomList.push(data.roomname);
+        }
+        console.log("All room : ", roomList);
+    });
+
     socket.on("enter_room", (roomName,done) => {
         // socket id 확인
         // console.log(socket.id);
@@ -82,12 +108,20 @@ io.on("connection",socket => {
     socket.on("message",(msg,room,done) => {
         socket.to(room).emit("message", `${socket.nickname}: ${msg}`);
         done();
+        const insert =`INSERT INTO roomchat (nickname, chat , roomname) value ('${socket.nickname}','${msg}','${room}')`
+        connection.query(insert, (err , rows , fields) => {
+            if(err) {
+                console.log(err);
+            };
+            console.log("User info is : ", socket.nickname , msg ,room );
+        });
     })
 
     socket.on("nickname",nickname => {
         socket['nickname'] = nickname;
     })
 })
+
 
 
 
